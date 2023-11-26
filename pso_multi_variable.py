@@ -132,12 +132,17 @@ Objective function (Positions) = {[obj_func(x, y) for x, y in zip(self.x, self.y
             )
 
 
-x = np.array([1.0, 1.0, 0.0])
-y = np.array([1.0, -1.0, 0.0])
-v = np.array([0.0, 0.0, 0.0])
-c = np.array([1.0, 1.0])
-r = np.array([1.0, 0.5])
-w = 1
-
-pso = PSO(x, y, v, c, r, w)
-pso.iterate(1500)
+# def main():
+#     x = np.array([1.0, 1.0, 0.0])
+#     y = np.array([1.0, -1.0, 0.0])
+#     v = np.array([0.0, 0.0, 0.0])
+#     c = np.array([1.0, 1.0])
+#     r = np.array([1.0, 0.5])
+#     w = 1
+#
+#     pso = PSO(x, y, v, c, r, w)
+#     pso.iterate(1500)
+#
+#
+# if __name__ == "__main__":
+#     main()
