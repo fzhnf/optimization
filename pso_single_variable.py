@@ -51,10 +51,10 @@ class PSO:
         print(
             f"""Iterasi ke-0
 nilai x = {self.x}
-nilai f(x) = {[obj_func(i) for i in self.x]}
 nilai v = {self.v}
-nilai pBest = {self.p_best}
-nilai gBest = {self.g_best}
+nilai c = {self.c}
+nilai r = {self.r}
+nilai w = {self.w}
 """
         )
         for i in range(n):
