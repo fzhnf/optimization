@@ -1,5 +1,5 @@
 def obj_func(x: float, y: float) -> float:
-    return 0.26 * (x**2 + y**2) - 0.48 * x * y
+    return 0.39 * (x**2 + y**2) - 0.56 * x * y
 
 
 class PSO:

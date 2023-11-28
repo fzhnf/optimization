@@ -1,20 +1,8 @@
-import random
-
-"""
-    Task 1b: Implementasi PSO untuk mencari nilai minimum dari fungsi
-    f(x) = (4x^2 + x - 2)^2; -4 <= x <= 4 
-    dengan nilai R_1 dan R_2 adalah bilangan acak(0,1)
-    dan untuk nilai x_0 awal dari adalah 10 bilangan acak
-"""
-
-
-# fungsi objektif yang akan dioptimasi
 def obj_func(x: float) -> float:
     return round(((4.0 * x**2) + x - 2.0) ** 2, 4)
 
 
 class PSO:
-    # konstruktor digunakan untuk menginisialisasi nilai awal dari soal
     def __init__(
         self,
         x: list[float],
@@ -34,12 +22,10 @@ class PSO:
         f_values: list[float] = [obj_func(i) for i in x.copy()]
         self.g_best: float = x[f_values.index(min(f_values))]
 
-    # fungsi untuk mencari nilai pBest dari setiap partikel di dalam iterasi saat ini
     def find_p_best(self) -> None:
         for i, (x, old_x) in enumerate(zip(self.x, self.old_x)):
             self.p_best[i] = x if obj_func(x) < obj_func(old_x) else old_x
 
-    # fungsi untuk mencari nilai gBest dari setiap partikel di dalam iterasi saat ini
     def find_g_best(self) -> None:
         f_values: list[float] = [obj_func(i) for i in self.x]
         minimum_index: int = f_values.index(min(f_values))
@@ -49,7 +35,6 @@ class PSO:
             else self.g_best
         )
 
-    # fungsi untuk mengupdate nilai v dari setiap partikel di dalam iterasi saat ini
     def update_v(self) -> None:
         for i, (v, x, p_best) in enumerate(zip(self.v, self.x, self.p_best)):
             self.v[i] = (
@@ -58,7 +43,6 @@ class PSO:
                 + (self.c[1] * self.r[1] * (self.g_best - x))
             )
 
-    # fungsi untuk mengupdate nilai x dari setiap partikel di dalam iterasi saat ini
     def update_x(self) -> None:
         for i, (x, v) in enumerate(zip(self.x, self.v)):
             self.old_x[i], self.x[i] = x, x + v
@@ -80,32 +64,28 @@ nilai w = {self.w}
             self.update_x()
             print(
                 f"""iterasi ke-{i+1}
-1.) menentukan x = = {[f"{i:.4f}" for i in self.old_x]}
-2.) menentukan f(x) = {[f"{obj_func(i):.4f}" for i in self.old_x]}
-3.) menentukan gBest = {self.g_best:.4f}
-4.) menentukan pBest = {[f"{i:.4f}" for i in self.p_best]}
-5.) menentukan v = {[f"{i:.4f}" for i in self.v]}
-6.) update x = {[f"{i:.4f}" for i in self.x]}\n"""
+1.) menentukan x = {self.old_x}
+2.) menentukan f(x) = {[obj_func(i) for i in self.old_x]}
+3.) menentukan gBest = {self.g_best}
+4.) menentukan pBest = {self.p_best}
+5.) menentukan v = {self.v}
+6.) update x = {self.x}\n"""
             )
 
         print(f"nilai minimum dari f(x) adalah {obj_func(self.g_best)}")
 
 
-"""
-    semua variabel ada di dalam main()
-    dengan x berisi 10 bilangan acak dari -4 sampai 4 
-    lalu r berisi 2 bilangan acak dari 0 sampai 1 
-"""
-
-
 def main() -> None:
+    x_0: float = 0.0
+    x_1: float = 0.5
+    x_2: float = 1.0
     v_0: float = 0.0
     c_1: float = 0.5
     c_2: float = 1.0
-    r_1: float = round(random.random(), 4)
-    r_2: float = round(random.random(), 4)
+    r_1: float = 0.5
+    r_2: float = 0.5
     w: float = 1.0
-    particles: list[float] = [float(random.randint(-4, 4)) for _ in range(10)]
+    particles: list[float] = [x_0, x_1, x_2]
     velocities: list[float] = [v_0 for _ in range(len(particles))]
     acceleration_coefficients: list[float] = [c_1, c_2]
     random_numbers: list[float] = [r_1, r_2]
