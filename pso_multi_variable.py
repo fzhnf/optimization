@@ -1,148 +1,125 @@
-import numpy as np
-from numpy.typing import NDArray
-from typing import Any
-
-
-def obj_func(x: NDArray, y: NDArray) -> Any:
-    return 1 / 3 * np.sqrt(x**2 + y**2 + 25)
+def obj_func(x: float, y: float) -> float:
+    return round(0.26 * (x**2.0 + y**2.0) - 0.48 * x * y, 4)
 
 
 class PSO:
     def __init__(
-        self, x: NDArray, y: NDArray, v: NDArray, c: NDArray, r: NDArray, w: float
+        self,
+        x: list[float],
+        y: list[float],
+        v: list[float],
+        c: list[float],
+        r: list[float],
+        w: float,
     ) -> None:
-        self.x: NDArray = x
-        self.y: NDArray = y
-        self.velocities_x: NDArray = v
-        self.velocities_y: NDArray = v.copy()
-        self.coefficients: NDArray = c
-        self.ranges: NDArray = r
-        self.weight: float = w
+        self.x: list[float] = x
+        self.y: list[float] = y
+        self.v: list[list[float]] = [[x, y] for x, y in zip(v, v)]
+        self.c: list[float] = c
+        self.r: list[float] = r
+        self.w: float = w
 
-        self.old_x: NDArray = x.copy()
-        self.old_y: NDArray = y.copy()
-        self.p_best_x: Any = x.copy()
-        self.p_best_y: Any = y.copy()
-        self.g_best_x: Any = self.x[
-            np.argmin([obj_func(x, y) for x, y in zip(self.x, self.y)])
-        ]
-        self.g_best_y: Any = self.y[
-            np.argmin([obj_func(x, y) for x, y in zip(self.x, self.y)])
+        self.old_x: list[float] = x.copy()
+        self.old_y: list[float] = y.copy()
+        self.p_best: list[list[float]] = [[x, y] for x, y in zip(x, y)]
+
+        fvalues = [obj_func(x, y) for x, y in zip(self.x, self.y)]
+        self.g_best: list[float] = [
+            self.x[fvalues.index(min(fvalues))],
+            self.y[fvalues.index(min(fvalues))],
         ]
 
-    def update_personal_best(self) -> None:
-        for i in range(len(self.x)):
-            value = obj_func(self.x[i], self.y[i])
-            p_best_f_value = obj_func(self.p_best_x[i], self.p_best_y[i])
-            if value < p_best_f_value:
-                self.p_best_x[i] = self.x[i]
-                self.p_best_y[i] = self.y[i]
-            else:
-                self.p_best_x[i] = self.old_x[i]
-                self.p_best_y[i] = self.old_y[i]
+    def find_p_best(self) -> None:
+        for i, (x, y, old_x, old_y) in enumerate(
+            zip(self.x, self.y, self.old_x, self.old_y)
+        ):
+            self.p_best[i] = (
+                [x, y]
+                if obj_func(x, y) < obj_func(old_x, old_y)
+                else [
+                    old_x,
+                    old_y,
+                ]
+            )
 
-    def update_global_best(self) -> None:
-        minimumIndex = np.argmin([obj_func(x, y) for x, y in zip(self.x, self.y)])
-        self.g_best_x = self.x[minimumIndex]
-        self.g_best_y = self.y[minimumIndex]
+    def find_g_best(self) -> None:
+        fValues = [obj_func(x, y) for x, y in zip(self.x, self.y)]
+        minimumIndex = fValues.index(min(fValues))
+        self.g_best = (
+            [self.x[minimumIndex], self.y[minimumIndex]]
+            if obj_func(self.x[minimumIndex], self.y[minimumIndex])
+            < obj_func(self.g_best[0], self.g_best[1])
+            else self.g_best
+        )
 
     def update_velocities(self) -> None:
-        for i in range(len(self.x)):
-            self.velocities_x[i] = (
-                (self.weight * self.velocities_x[i])
-                + (
-                    self.coefficients[0]
-                    * self.ranges[0]
-                    * (self.p_best_x[i] - self.x[i])
-                )
-                + (self.coefficients[1] * self.ranges[1] * (self.g_best_x - self.x[i]))
+        for i, (x, y) in enumerate(zip(self.x, self.y)):
+            self.v[i][0] = (
+                (self.w * self.v[i][0])
+                + (self.c[0] * self.r[0] * (self.p_best[i][0] - x))
+                + (self.c[1] * self.r[1] * (self.g_best[0] - x))
             )
-            self.velocities_y[i] = (
-                (self.weight * self.velocities_y[i])
-                + (
-                    self.coefficients[0]
-                    * self.ranges[0]
-                    * (self.p_best_y[i] - self.y[i])
-                )
-                + (self.coefficients[1] * self.ranges[1] * (self.g_best_y - self.y[i]))
+            self.v[i][1] = (
+                (self.w * self.v[i][1])
+                + (self.c[0] * self.r[0] * (self.p_best[i][1] - y))
+                + (self.c[1] * self.r[1] * (self.g_best[1] - y))
             )
 
-    def update_positions(self):
-        for i in range(len(self.x)):
-            self.old_x[i] = self.x[i]
-            self.old_y[i] = self.y[i]
-            self.x[i] = self.x[i] + self.velocities_x[i]
-            self.y[i] = self.y[i] + self.velocities_y[i]
+    def update_particles(self) -> None:
+        for i, (x, y) in enumerate(zip(self.x, self.y)):
+            self.old_x[i], self.old_y[i] = x, y
+            self.x[i], self.y[i] = x + self.v[i][0], y + self.v[i][1]
 
-    def iterate(self, n):
-        # print(f"Iterasi 0")
-        # print(f"x = {self.x}")
-        # print(f"y = {self.y}")
-        # print(f"vx = {self.velocities_x}")
-        # print(f"vy = {self.velocities_y}")
-        # print(f"pBest = {self.p_best_x}")
-        # print(f"gBest = {self.g_best_x}")
-        # print(f"pBest = {self.p_best_y}")
-        # print(f"gBest = {self.g_best_y}")
-        # print(f"f(gBest x, gBest y) = {f(self.g_best_x, self.g_best_y)}")
-        # print()
+    def iterate(self, n) -> None:
         print(
-            f"""Iterasi 0
-Positions x = {self.x}
-Positions y = {self.y}
-Velocities x = {self.velocities_x}
-Velocities y = {self.velocities_y}
-Personal best x = {self.p_best_x}
-Personal best y = {self.p_best_y}
-Global best x = {self.g_best_x}
-Global best y = {self.g_best_y}
-Objective function value = {obj_func(self.g_best_x, self.g_best_y)}
+            f"""Iterasi ke-0
+nilai (x,y) = {list(zip(self.x, self.y))}
+nilai f(x,y) = {[obj_func(x, y) for x, y in zip(self.x, self.y)]}
+nilai (vx,vy) = {self.v}
+nilai pBest = {self.p_best}
+nilai gBest = {self.g_best}
 """
         )
         for i in range(n):
-            self.update_personal_best()
-            self.update_global_best()
+            self.find_p_best()
+            self.find_g_best()
             self.update_velocities()
-            self.update_positions()
-            # print(f"Iterasi", i + 1)
-            # print(f"x = {self.x}")
-            # print(f"y = {self.y}")
-            # print(f"vx = {self.velocities_x}")
-            # print(f"vy = {self.velocities_y}")
-            # print(f"pBest = {self.p_best_x}")
-            # print(f"gBest = {self.g_best_x}")
-            # print(f"pBest = {self.p_best_y}")
-            # print(f"gBest = {self.g_best_y}")
-            # print(f"f(gBest x, gBest y) = {obj_func(self.g_best_x, self.g_best_y)}")
-            # print(f"f(x, y) = {[obj_func(x, y) for x, y in zip(self.x, self.y)]}")
-            # print()
+            self.update_particles()
             print(
-                f"""Iterasi {i+1}
-Positions x = {self.x}
-Positions y = {self.y}
-Velocities x = {self.velocities_x}
-Velocities y = {self.velocities_y}
-Personal best x = {self.p_best_x}
-Personal best y = {self.p_best_y}
-Global best x = {self.g_best_x}
-Global best y = {self.g_best_y}
-Objective function (Global best) = {obj_func(self.g_best_x, self.g_best_y)}
-Objective function (Positions) = {[obj_func(x, y) for x, y in zip(self.x, self.y)]}
-"""
+                f"""Iterasi ke-{i+1}
+1.) menentukan (x,y) = {list(zip(self.old_x, self.old_y))}
+2.) menentukan f(x,y) = {[obj_func(x, y) for x, y in zip(self.old_x, self.old_y)]}
+3.) menentukan gBest = {self.g_best}
+4.) menentukan pBest = {self.p_best}
+5.) menentukan (vx,vy) = {self.v}
+6.) update (x,y) = {list(zip(self.x, self.y))}\n"""
             )
+        print(
+            f"Nilai minimum dari f(x,y) adalah {obj_func(self.g_best[0], self.g_best[1])}"
+        )
 
 
-# def main():
-#     x = np.array([1.0, 1.0, 0.0])
-#     y = np.array([1.0, -1.0, 0.0])
-#     v = np.array([0.0, 0.0, 0.0])
-#     c = np.array([1.0, 1.0])
-#     r = np.array([1.0, 0.5])
-#     w = 1
-#
-#     pso = PSO(x, y, v, c, r, w)
-#     pso.iterate(1500)
-#
-#
-# if __name__ == "__main__":
-#     main()
+x_0, y_0 = 1.0, 1.0
+x_1, y_1 = -2.0, -1.0
+x_2, y_2 = 2.0, 2.0
+v_0 = 0.0
+c_1 = 1.0
+c_2 = 0.5
+r_1 = 1.0
+r_2 = 1.0
+w = 1.0
+
+particles_x, particles_y = [x_0, x_1, x_2], [y_0, y_1, y_2]
+velocities = [v_0 for _ in range(len(particles_x))]
+acceleration_coefficients = [c_1, c_2]
+random_numbers = [r_1, r_2]
+inertia_weight = w
+pso = PSO(
+    particles_x,
+    particles_y,
+    velocities,
+    acceleration_coefficients,
+    random_numbers,
+    inertia_weight,
+)
+pso.iterate(3)
