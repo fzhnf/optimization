@@ -1,11 +1,5 @@
 import random
-
-"""
-    Task 1b: Implementasi PSO untuk mencari nilai minimum dari fungsi
-    f(x) = (4x^2 + x - 2)^2; -4 <= x <= 4 
-    dengan nilai R_1 dan R_2 adalah bilangan acak(0,1)
-    dan untuk nilai x_0 awal dari adalah 10 bilangan acak
-"""
+import matplotlib.pyplot as plt
 
 
 # fungsi objektif yang akan dioptimasi
@@ -34,12 +28,10 @@ class PSO:
         f_values: list[float] = [obj_func(i) for i in x.copy()]
         self.g_best: float = x[f_values.index(min(f_values))]
 
-    # fungsi untuk mencari nilai pBest dari setiap partikel di dalam iterasi saat ini
     def find_p_best(self) -> None:
         for i, (x, old_x) in enumerate(zip(self.x, self.old_x)):
             self.p_best[i] = x if obj_func(x) < obj_func(old_x) else old_x
 
-    # fungsi untuk mencari nilai gBest dari setiap partikel di dalam iterasi saat ini
     def find_g_best(self) -> None:
         f_values: list[float] = [obj_func(i) for i in self.x]
         minimum_index: int = f_values.index(min(f_values))
@@ -49,7 +41,6 @@ class PSO:
             else self.g_best
         )
 
-    # fungsi untuk mengupdate nilai v dari setiap partikel di dalam iterasi saat ini
     def update_v(self) -> None:
         for i, (v, x, p_best) in enumerate(zip(self.v, self.x, self.p_best)):
             self.v[i] = (
@@ -58,7 +49,6 @@ class PSO:
                 + (self.c[1] * self.r[1] * (self.g_best - x))
             )
 
-    # fungsi untuk mengupdate nilai x dari setiap partikel di dalam iterasi saat ini
     def update_x(self) -> None:
         for i, (x, v) in enumerate(zip(self.x, self.v)):
             self.old_x[i], self.x[i] = x, x + v
@@ -91,13 +81,6 @@ nilai w = {self.w}
         print(f"nilai minimum dari f(x) adalah {obj_func(self.g_best)}")
 
 
-"""
-    semua variabel ada di dalam main()
-    dengan x berisi 10 bilangan acak dari -4 sampai 4 
-    lalu r berisi 2 bilangan acak dari 0 sampai 1 
-"""
-
-
 def main() -> None:
     v_0: float = 0.0
     c_1: float = 0.5
@@ -117,7 +100,6 @@ def main() -> None:
         random_numbers,
         inertia_weight,
     )
-    pso.iterate(3)
 
 
 if __name__ == "__main__":

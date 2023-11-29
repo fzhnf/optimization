@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+
+
 def obj_func(x: float) -> float:
     return round(x / ((x**2) + 1.0), 4)
 
@@ -21,6 +24,12 @@ class PSO:
         self.p_best: list[float] = x.copy()
         f_values: list[float] = [obj_func(i) for i in x.copy()]
         self.g_best: float = x[f_values.index(min(f_values))]
+
+        self.x_history: list[list[float]] = []
+        self.p_best_history: list[list[float]] = []
+        self.g_best_history: list[float] = []
+        self.v_history: list[list[float]] = []
+        self.f_x_history: list[list[float]] = []
 
     def find_p_best(self) -> None:
         for i, (x, old_x) in enumerate(zip(self.x, self.old_x)):
@@ -62,6 +71,12 @@ nilai w = {self.w}
             self.find_p_best()
             self.update_v()
             self.update_x()
+            self.x_history.append(self.old_x.copy())
+            self.p_best_history.append(self.p_best.copy())
+            self.g_best_history.append(self.g_best)
+            self.v_history.append(self.v.copy())
+            self.f_x_history.append([obj_func(i) for i in self.x])
+
             print(
                 f"""iterasi ke-{i+1}
 1.) menentukan x = {self.old_x}
@@ -73,6 +88,48 @@ nilai w = {self.w}
             )
 
         print(f"nilai minimum dari f(x) adalah {obj_func(self.g_best)}")
+
+    def plot(self):
+        fig, axs = plt.subplots(2, 2, figsize=(15, 15))
+
+        axs[0, 0].plot(range(1, len(self.x_history) + 1), self.x_history)
+        axs[0, 0].legend(["x_0", "x_1", "x_2"])
+        axs[0, 0].set_xlabel("iterasi")
+        axs[0, 0].set_ylabel("nilai x")
+        axs[0, 0].set_title("x")
+
+        axs[0, 1].plot(range(1, len(self.p_best_history) + 1), self.p_best_history)
+        axs[0, 1].legend(["p_best_0", "p_best_1", "p_best_2"])
+        axs[0, 1].set_xlabel("iterasi")
+        axs[0, 1].set_ylabel("nilai p_best")
+        axs[0, 1].set_title("p_best")
+
+        axs[1, 0].plot(range(1, len(self.g_best_history) + 1), self.g_best_history)
+        axs[1, 0].set_xlabel("iterasi")
+        axs[1, 0].set_ylabel("nilai g_best")
+        axs[1, 0].set_title("g_best")
+
+        axs[1, 1].plot(range(1, len(self.v_history) + 1), self.v_history)
+        axs[1, 1].legend(["v_0", "v_1", "v_2"])
+        axs[1, 1].set_xlabel("iterasi")
+        axs[1, 1].set_ylabel("nilai v")
+        axs[1, 1].set_title("v")
+
+        plt.tight_layout(h_pad=6)
+        plt.show()
+
+        fig, ax = plt.subplots(
+            figsize=(5, 5)
+        )  # Create a new figure with a single subplot
+
+        ax.plot(range(1, len(self.f_x_history) + 1), self.f_x_history)
+        ax.legend(["f(x_0)", "f(x_1)", "f(x_2)"])
+        ax.set_xlabel("iterasi")
+        ax.set_ylabel("nilai f(x)")
+        ax.set_title("f(x)")
+
+        plt.tight_layout()
+        plt.show()
 
 
 def main() -> None:
@@ -98,6 +155,7 @@ def main() -> None:
         inertia_weight,
     )
     pso.iterate(3)
+    pso.plot()
 
 
 if __name__ == "__main__":
