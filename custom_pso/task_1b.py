@@ -104,7 +104,7 @@ nilai w = {self.w}
 
             print(
                 f"""iterasi ke-{i+1}
-1.) menentukan x = = {[float(f"{i:.4f}") for i in self.old_x]}
+1.) menentukan x = {[float(f"{i:.4f}") for i in self.old_x]}
 2.) menentukan f(x) = {[float(f"{obj_func(i):.4f}") for i in self.old_x]}
 3.) menentukan gBest = {self.g_best:.4f}
 4.) menentukan pBest = {[float(f"{i:.4f}") for i in self.p_best]}
