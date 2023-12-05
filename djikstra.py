@@ -2,12 +2,12 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 class Node:
-    def __init__(self, name, neighbors)->None:
+    def __init__(self, name, neighbors):
         self.name = name
         self.neighbors = neighbors
 
-class Djikstra:
-    def __init__(self, graph)->None:
+class Dijkstra:
+    def __init__(self, graph):
         # Inisialisasi objek djikstra dengan graf sebagai parameter
         self.graph = graph
         # Membuat objek Node untuk setiap node dalam graf
@@ -91,7 +91,7 @@ def visualize_graph_with_highlighted_path(graph, shortest_path):
 
 def main():
     # Definisi graf
-    graph: dict[str,dict[str,int]]= {
+    graph= {
         'A': {'B':16, 'C':3, 'D':10},
         'B': {'D':2,'I':8},
         'C': {'B':12,'E':7},
@@ -106,9 +106,9 @@ def main():
     end_node:str = 'I'
 
     # Membuat objek djikstra
-    djikstra:Djikstra = Djikstra(graph)
+    DJK:Dijkstra = Dijkstra(graph)
     # Mencari jalur terpendek dari start_node ke end_node
-    shortest_path = djikstra.find_shortest_path(start_node, end_node)
+    shortest_path = DJK.find_shortest_path(start_node, end_node)
 
     # Menampilkan hasil jalur terpendek
     if shortest_path:
